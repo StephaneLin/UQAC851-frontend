@@ -48,7 +48,6 @@ class _PendingInvoicePage extends State<PendingInvoicePage> {
               future: invoices,
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
-                  print(snapshot.data!.length);
                   return displayPendingInvoiceList(widget.userObj, snapshot.data!, context);
                 } else {
                   return Expanded(child: Center(child: CircularProgressIndicator()));
@@ -87,10 +86,10 @@ Container invoiceItems(User userObj, List<Invoice> invoicesList, int index, Buil
               Icons.upload_rounded,
               color: Colors.green,
             ),
-            trailing: invoiceAmount(invoicesList, index),
-            title: invoiceActor(invoicesList, index),
+            trailing: invoiceAmount(invoicesList, index, userObj),
+            title: invoiceActor(invoicesList, index, userObj),
             subtitle: invoiceDate(invoicesList, index),
-            onTap: () => {_showMyDialog(userObj, 890, invoicesList, index, context)}),
+            onTap: () => {_showMyDialog(userObj, invoicesList[index].amount, invoicesList, index, context)}),
       ],
     ),
   );

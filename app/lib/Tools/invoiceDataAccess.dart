@@ -39,6 +39,7 @@ Future<List<Invoice>> getPaidInvoices(User userObj) async {
   }
 }
 
+// Facture que je dois payer
 Future<List<Invoice>> getUnpaidInvoices(User userObj) async {
   var client = http.Client();
   try {
@@ -46,11 +47,14 @@ Future<List<Invoice>> getUnpaidInvoices(User userObj) async {
         Uri.https(env["URL_PROD"].toString(), "/users/${userObj.email}/banks/${userObj.userAccount}/invoices"),
         headers: {HttpHeaders.authorizationHeader: "Bearer ${userObj.token}"});
     if (response.statusCode == 200) {
+      print("unpaid invoice : user id : ${userObj.userAccount}");
       List<Invoice> invoices;
       invoices = (json.decode(response.body) as List).map((i) => Invoice.fromJson(i)).toList();
       invoices = invoices
           .where((x) =>
-              x.acquitted == false && x.senderId == userObj.id && DateTime.parse(x.dueDate).isAfter(DateTime.now()))
+              x.acquitted == false &&
+              x.senderId == userObj.userAccount &&
+              DateTime.parse(x.dueDate).isAfter(DateTime.now()))
           .toList();
       invoices.sort((a, b) => a.dueDate.compareTo(b.dueDate));
       return invoices;
@@ -62,18 +66,20 @@ Future<List<Invoice>> getUnpaidInvoices(User userObj) async {
   }
 }
 
+// facture que j'ai emise et qui doivent etre payé
 Future<List<Invoice>> getPendingInvoices(User userObj) async {
   var client = http.Client();
   try {
     var response = await client.get(
         Uri.https(env["URL_PROD"].toString(), "/users/${userObj.email}/banks/${userObj.userAccount}/invoices"),
         headers: {HttpHeaders.authorizationHeader: "Bearer ${userObj.token}"});
+
     if (response.statusCode == 200) {
       List<Invoice> invoices;
-      print("bonjour");
+      print("pending invoice : user id : ${userObj.userAccount}");
 
       invoices = (json.decode(response.body) as List).map((i) => Invoice.fromJson(i)).toList();
-      invoices = invoices.where((x) => x.acquitted == false && x.receiverId == userObj.id).toList();
+      invoices = invoices.where((x) => x.acquitted == false && x.receiverId == userObj.userAccount).toList();
       invoices.sort((a, b) => -a.dueDate.compareTo(b.dueDate));
       return invoices;
     } else {
